@@ -134,9 +134,13 @@ class DataManager:
         for table in tables_sql:
             self.db_manager.execute(table)
 
-    def insert_data(self):
+    def drop_tables(self):
+        command = "DROP TABLE IF EXISTS room, students"
+        self.db_manager.execute(command)
 
-        rooms = JSONHandler.get_data("rooms.json")
+    def insert_data(self, rooms_path, students_path):
+
+        rooms = JSONHandler.get_data(rooms_path)
         for room in rooms:
             query = """
             INSERT INTO room (id, name)
@@ -146,7 +150,7 @@ class DataManager:
             params = (room["id"], room["name"])
             self.db_manager.execute(query, params)
 
-        students = JSONHandler.get_data("students.json")
+        students = JSONHandler.get_data(students_path)
         for student in students:
             query ="""
                 INSERT INTO students (birthday, id, name, room, sex)
@@ -159,8 +163,11 @@ class DataManager:
 if __name__ == "__main__":
     with DatabaseManager(host, database, user, password) as db_manager:
         datamanager = DataManager(db_manager)
+        datamanager.drop_tables()
         datamanager.initialize_tables()
-        datamanager.insert_data()
+        room_file_path = input("Enter the path to the room file: ")
+        student_file_path = input("Enter the path to the student file: ")
+        datamanager.insert_data(rooms_path=room_file_path, students_path=student_file_path)
         datamanager.list_of_rooms_and_students_on_them()
         datamanager.list_of_rooms_with_large_age_difference()
         datamanager.list_of_multisex_rooms()
